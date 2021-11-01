@@ -11,8 +11,17 @@
       v-for="(day, index) in days"
       :key="index"
       class="day"
+      :class="{
+        'day--out-of-month': !day.isCurrentMonth,
+        'day--is-weekend': day.isWeekend
+      }"
     >
-      {{ day.dayOfMonth }}
+      <div class="day__number">
+        {{ day.dayOfMonth }}
+      </div>
+      <div v-for="(task, taskIndex) in day.tasks" :key="taskIndex" class="day__task">
+        {{ task.title }}
+      </div>
     </div>
   </div>
 </template>
@@ -23,6 +32,7 @@ import {
   setDate,
   lastDayOfMonth,
   lastDayOfWeek,
+  isWeekend,
   eachDayOfInterval,
   eachWeekOfInterval
 } from 'date-fns'
@@ -41,7 +51,6 @@ export default {
         'Friday',
         'Saturday'
       ],
-      daysOfMonth: [...Array(31).keys()],
       date: new Date(),
       numberOfWeeks: null,
       days: [],
@@ -50,9 +59,7 @@ export default {
   },
 
   mounted () {
-    this.setWeeksOfMonth()
-    this.setCurrentCalendarInterval()
-    this.setDaysOfMonth()
+    this.setCurrentMonth()
 
     console.log('currentCalendarInterval', this.currentCalendarInterval)
     console.log('this.days', this.days)
@@ -60,6 +67,13 @@ export default {
   },
 
   methods: {
+    // TODO: refactor for multiple months
+    setCurrentMonth () {
+      this.setWeeksOfMonth()
+      this.setCurrentCalendarInterval()
+      this.setDaysOfMonth()
+    },
+
     setCurrentCalendarInterval () {
       this.currentCalendarInterval = {
         start: this.weeksOfMonth[0],
@@ -78,38 +92,77 @@ export default {
 
     setDaysOfMonth () {
       this.days = eachDayOfInterval(this.currentCalendarInterval).map(day => {
+        const isCurrentMonth = format(day, 'M') === this.currentDate.month
+
         return {
           dayOfWeek: format(day, 'EEEE'),
           dayOfMonth: format(day, 'd'),
           month: format(day, 'M'),
           year: format(day, 'y'),
           date: day,
-          weekOfMonth: 1
+          weekOfMonth: 1,
+          isWeekend: isWeekend(day),
+          isCurrentMonth,
+          tasks: [
+            // { title: format(day, 'EEEE') },
+            // { title: format(day, 'MMMM') }
+          ]
         }
       })
+    }
+  },
+
+  computed: {
+    currentDate () {
+      return {
+        day: format(this.date, 'd'),
+        month: format(this.date, 'M'),
+        year: format(this.date, 'y')
+      }
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
   .calendar {
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
   }
 
   .calendar__header {
     display: flex;
-    background-color: blue;
+    background-color: #3575af;
     color: #fff;
     align-items: center;
+    font-size: 14px;
     justify-content: center;
-    padding: 1vw;
+    line-height: 1.5rem;
   }
 
   .day {
+    color: #000;
+    background-color: #fff;
     min-height: 100px;
-    background-color: lightgrey;
-    padding: 1vw;
+    padding: 0.5rem;
+    font-size: 14px;
+    border: 1px solid #c3c3c3;
+
+    .day__number {
+      font-weight: 700;
+    }
+  }
+
+  .day.day--out-of-month {
+    .day__number {
+      color: #bababa;
+      font-weight: 300;
+    }
+  }
+
+  .day.day--is-weekend {
+    color: #3575af;
+    background-color: #f2f2f2;
   }
 </style>
