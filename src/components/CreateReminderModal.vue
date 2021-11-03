@@ -85,6 +85,25 @@
             </v-btn>
           </v-time-picker>
         </v-dialog>
+
+        <v-autocomplete
+          v-model="city"
+          :items="cities"
+          label="City"
+          prepend-icon="mdi-city"
+          @change="updateWeather"
+        >
+          <template v-slot:item="data">
+            <v-list-item-content v-text="data.item"></v-list-item-content>
+          </template>
+        </v-autocomplete>
+        <v-chip
+          v-if="todayWeather"
+          class="city-weather"
+          color="primary"
+        >
+          {{ todayWeather }}
+        </v-chip>
         <v-color-picker
           v-model="color"
           hide-canvas
@@ -120,8 +139,8 @@
 </template>
 
 <script>
-import { parseISO } from 'date-fns'
-import format from 'date-fns/esm/format'
+import { parseISO, format } from 'date-fns'
+import { weatherCities } from '../constants/cities'
 
 export default {
   name: 'CreateReminderModal',
@@ -131,6 +150,8 @@ export default {
       dateMenu: false,
       timeModal: false,
       time: '12:00',
+      cities: weatherCities,
+      city: '',
       rules: {
         reminder: [
           v => !!v || 'You must add note',
@@ -165,6 +186,14 @@ export default {
 
     date () {
       return parseISO(`${this.datePicker}T${this.time}`)
+    },
+
+    todayWeather () {
+      const city = this.$store.state.cityWeather
+
+      return city
+        ? `${city.city}'s weather today - ${city.weather.toUpperCase()}`
+        : null
     }
   },
 
@@ -185,6 +214,7 @@ export default {
         label: this.reminderTitle,
         color: this.color,
         date: this.date,
+        city: this.city,
         time: format(this.date, 'HH:mm')
       }
 
@@ -192,6 +222,10 @@ export default {
       this.$store.commit('ADD_DAY_REMINDER', reminder)
 
       this.closeReminderModal()
+    },
+
+    updateWeather (city) {
+      this.$store.dispatch('getDayWheater', city)
     }
   }
 }
@@ -200,5 +234,10 @@ export default {
 <style>
 .reminder__form {
   padding: 2rem;
+}
+
+.city-weather {
+  width: 100%;
+  margin-bottom: 10px;
 }
 </style>
