@@ -1,124 +1,89 @@
 <template>
-  <div class="calendar">
-    <div
-      v-for="(day, index) of daysOfWeek"
-      :key="index"
-      class="calendar__header"
-    >
-      {{ day }}
+  <div class="calendar__container">
+    <div class="month__header">
+      <v-btn class="mx-2"
+        x-small
+        fab
+        dark
+        elevation="0"
+        color="primary"
+      >
+        <v-icon dark @click="changeMonth('back')">
+          mdi-less-than
+        </v-icon>
+      </v-btn>
+      <div class="month__title">{{ calendar.currentMonth }}</div>
+      <v-btn
+        class="mx-2"
+        x-small
+        fab
+        dark
+        elevation="0"
+        color="primary"
+      >
+        <v-icon dark @click="changeMonth()">
+          mdi-greater-than
+        </v-icon>
+      </v-btn>
     </div>
-    <div
-      v-for="(day, index) in days"
-      :key="index"
-      class="day"
-      :class="{
-        'day--out-of-month': !day.isCurrentMonth,
-        'day--is-weekend': day.isWeekend
-      }"
-    >
-      <div class="day__number">
-        {{ day.dayOfMonth }}
+    <div class="calendar">
+      <div
+        v-for="(day) of daysOfWeek"
+        :key="day"
+        class="calendar__header"
+      >
+        {{ day }}
       </div>
-      <div v-for="(task, taskIndex) in day.tasks" :key="taskIndex" class="day__task">
-        {{ task.title }}
+      <div
+        v-for="(day, dayIndex) in calendar.days"
+        :key="dayIndex"
+        class="day"
+        :class="{
+          'day--out-of-month': !day.isCurrentMonth,
+          'day--is-weekend': day.isWeekend
+        }"
+      >
+        <div class="day__number">
+          {{ day.dayOfMonth }}
+        </div>
+        <template v-if="day.monthData">
+          <div
+            v-for="(task, taskIndex) in day.monthData.tasks"
+            :key="taskIndex"
+            class="day__task"
+            :style="{ backgroundColor: task.color.hex }"
+          >
+            {{ task.label }}
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import {
-  format,
-  setDate,
-  lastDayOfMonth,
-  lastDayOfWeek,
-  isWeekend,
-  eachDayOfInterval,
-  eachWeekOfInterval
-} from 'date-fns'
+import { subMonths, addMonths } from 'date-fns'
 
 export default {
   name: 'Calendar',
 
-  data () {
-    return {
-      daysOfWeek: [
-        'Sunday',
-        'Monday',
-        'Twuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ],
-      date: new Date(),
-      numberOfWeeks: null,
-      days: [],
-      currentCalendarInterval: null
-    }
-  },
-
-  mounted () {
-    this.setCurrentMonth()
-
-    console.log('currentCalendarInterval', this.currentCalendarInterval)
-    console.log('this.days', this.days)
-    console.log('numberOfWeeks', this.numberOfWeeks)
-  },
-
   methods: {
-    // TODO: refactor for multiple months
-    setCurrentMonth () {
-      this.setWeeksOfMonth()
-      this.setCurrentCalendarInterval()
-      this.setDaysOfMonth()
-    },
+    changeMonth (direction = 'next') {
+      const newDate = direction === 'back'
+        ? subMonths(this.calendar.date, 1)
+        : addMonths(this.calendar.date, 1)
 
-    setCurrentCalendarInterval () {
-      this.currentCalendarInterval = {
-        start: this.weeksOfMonth[0],
-        end: lastDayOfWeek(this.weeksOfMonth[this.weeksOfMonth.length - 1])
-      }
-    },
-
-    setWeeksOfMonth () {
-      const firstDayOfMonth = setDate(this.date, 1)
-
-      this.weeksOfMonth = eachWeekOfInterval({
-        start: firstDayOfMonth,
-        end: lastDayOfMonth(this.date)
-      })
-    },
-
-    setDaysOfMonth () {
-      this.days = eachDayOfInterval(this.currentCalendarInterval).map(day => {
-        const isCurrentMonth = format(day, 'M') === this.currentDate.month
-
-        return {
-          dayOfWeek: format(day, 'EEEE'),
-          dayOfMonth: format(day, 'd'),
-          month: format(day, 'M'),
-          year: format(day, 'y'),
-          date: day,
-          weekOfMonth: 1,
-          isWeekend: isWeekend(day),
-          isCurrentMonth,
-          tasks: [
-            // { title: format(day, 'EEEE') },
-            // { title: format(day, 'MMMM') }
-          ]
-        }
-      })
+      this.$store.dispatch('setCalendarCurrentMonth', newDate)
     }
   },
 
   computed: {
-    currentDate () {
-      return {
-        day: format(this.date, 'd'),
-        month: format(this.date, 'M'),
-        year: format(this.date, 'y')
-      }
+    daysOfWeek () {
+      return this.$store.state.daysOfWeek
+    },
+
+    calendar () {
+      return this.$store.state.calendar
     }
   }
 }
@@ -141,28 +106,62 @@ export default {
     line-height: 1.5rem;
   }
 
+  .calendar__container {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    max-width: 1200px;
+    flex-direction: column;
+    width: 100%;
+  }
+
   .day {
     color: #000;
     background-color: #fff;
-    min-height: 100px;
+    height: 150px;
+    min-width: 80px;
     padding: 0.5rem;
     font-size: 14px;
     border: 1px solid #c3c3c3;
+    overflow-y: auto;
 
     .day__number {
       font-weight: 700;
     }
+
+    .day__task {
+      color: white;
+      padding: .25rem;
+      font-size: .75rem;
+      letter-spacing: .1rem;
+    }
+
+    &:hover {
+      border-color: #3575af;
+      cursor: pointer;
+    }
   }
 
-  .day.day--out-of-month {
-    .day__number {
-      color: #bababa;
-      font-weight: 300;
-    }
+  .day.day--out-of-month .day__number {
+    color: #bababa;
+    font-weight: 300;
   }
 
   .day.day--is-weekend {
     color: #3575af;
     background-color: #f2f2f2;
+  }
+
+  .month__header {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 1rem;
+  }
+
+  .month__title {
+    font-size: 2rem;
+    align-items: center;
+    margin: 0 1rem;
   }
 </style>

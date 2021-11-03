@@ -17,6 +17,7 @@
               dark
               v-bind="attrs"
               v-on="on"
+              @click.stop="openReminderModal"
             >
               +
             </v-btn>
@@ -25,23 +26,36 @@
         </v-tooltip>
     </v-app-bar>
 
-    <v-main class="app__container">
-      <h2 class="calendar__month">November</h2>
-      <div class="calendar__container">
+    <v-main>
+      <div class="app__container">
         <Calendar />
       </div>
     </v-main>
+
+    <CreateReminderModal />
   </v-app>
 </template>
 
 <script>
 import Calendar from '@/components/Calendar.vue'
+import CreateReminderModal from '@/components/CreateReminderModal.vue'
 
 export default {
   name: 'App',
 
   components: {
-    Calendar
+    Calendar,
+    CreateReminderModal
+  },
+
+  mounted () {
+    this.$store.dispatch('setCalendarCurrentMonth', new Date())
+  },
+
+  methods: {
+    openReminderModal () {
+      this.$store.commit('SET_REMINDER_MODAL_STATE', true)
+    }
   }
 }
 </script>
@@ -49,17 +63,8 @@ export default {
 <style lang="scss" scoped>
   .app__container {
     margin: 2rem;
-  }
-
-  .calendar__container {
     display: flex;
-    justify-content: center;
     align-items: center;
-  }
-
-  .calendar__month {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
+    flex-direction: column;
   }
 </style>
