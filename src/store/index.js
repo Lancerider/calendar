@@ -46,6 +46,8 @@ export default new Vuex.Store({
       currentMonth: null,
       days: []
     },
+    selectedDay: null,
+    showDayModal: false,
     showCreateReminderModal: false
   },
 
@@ -62,6 +64,10 @@ export default new Vuex.Store({
       state.calendar.days = calendarDays
     },
 
+    SET_SELECTED_DAY (state, day) {
+      state.selectedDay = day
+    },
+
     SET_NEW_MONTH (state, { monthDays, month }) {
       state.monthsData[month] = monthDays
     },
@@ -72,6 +78,10 @@ export default new Vuex.Store({
 
     SET_REMINDER_MODAL_STATE (state, visibility) {
       state.showCreateReminderModal = visibility
+    },
+
+    SET_DAY_MODAL_STATE (state, visibility) {
+      state.showDayModal = visibility
     },
 
     ADD_DAY_REMINDER (state, reminder) {

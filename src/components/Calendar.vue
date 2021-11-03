@@ -38,6 +38,7 @@
         v-for="(day, dayIndex) in calendar.days"
         :key="dayIndex"
         class="day"
+        @click="selectDay(day)"
         :class="{
           'day--out-of-month': !day.isCurrentMonth,
           'day--is-weekend': day.isWeekend
@@ -58,16 +59,39 @@
         </template>
       </div>
     </div>
+
+    <CalendarDayModal @closeDayModal="closeDayModal" />
   </div>
 </template>
 
 <script>
 import { subMonths, addMonths } from 'date-fns'
 
+import CalendarDayModal from '@/components/CalendarDayModal.vue'
+
 export default {
   name: 'Calendar',
 
+  components: {
+    CalendarDayModal
+  },
+
+  data () {
+    return {
+      showDayModal: false
+    }
+  },
+
   methods: {
+    closeDayModal () {
+      this.showDayModal = false
+    },
+
+    selectDay (day) {
+      this.$store.commit('SET_SELECTED_DAY', day)
+      this.$store.commit('SET_DAY_MODAL_STATE', true)
+    },
+
     changeMonth (direction = 'next') {
       const newDate = direction === 'back'
         ? subMonths(this.calendar.date, 1)
@@ -93,7 +117,8 @@ export default {
   .calendar {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    grid-template-columns: repeat(7, minmax(120px, 1fr));
+    overflow-x: auto;
   }
 
   .calendar__header {
@@ -119,7 +144,6 @@ export default {
     color: #000;
     background-color: #fff;
     height: 150px;
-    min-width: 80px;
     padding: 0.5rem;
     font-size: 14px;
     border: 1px solid #c3c3c3;
@@ -140,6 +164,11 @@ export default {
       border-color: #3575af;
       cursor: pointer;
     }
+  }
+
+  .day.day--out-of-month .day__number {
+    color: #bababa;
+    font-weight: 300;
   }
 
   .day.day--out-of-month .day__number {
