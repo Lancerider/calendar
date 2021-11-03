@@ -5,6 +5,8 @@
 yarn install
 ```
 
+You would need to make your own .env file following ".env.example" file structure. The current data in the example file works for dev enviroments.
+
 ### Compiles and hot-reloads for development
 ```
 yarn serve
@@ -15,15 +17,9 @@ yarn serve
 yarn build
 ```
 
+This app triggers netlify pipeline to this page.
+
 ### Run your unit tests
 ```
 yarn test:unit
 ```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

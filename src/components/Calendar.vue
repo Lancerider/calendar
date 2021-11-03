@@ -54,13 +54,14 @@
             class="day__task"
             :style="{ backgroundColor: task.color.hex }"
           >
-            {{ task.label }}
+            {{ `${task.time} - ${task.label}` }}
           </div>
         </template>
       </div>
     </div>
 
     <CalendarDayModal @closeDayModal="closeDayModal" />
+    <CreateReminderModal />
   </div>
 </template>
 
@@ -68,12 +69,14 @@
 import { subMonths, addMonths } from 'date-fns'
 
 import CalendarDayModal from '@/components/CalendarDayModal.vue'
+import CreateReminderModal from '@/components/CreateReminderModal.vue'
 
 export default {
   name: 'Calendar',
 
   components: {
-    CalendarDayModal
+    CalendarDayModal,
+    CreateReminderModal
   },
 
   data () {

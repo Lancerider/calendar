@@ -32,20 +32,17 @@
       </div>
     </v-main>
 
-    <CreateReminderModal />
   </v-app>
 </template>
 
 <script>
 import Calendar from '@/components/Calendar.vue'
-import CreateReminderModal from '@/components/CreateReminderModal.vue'
 
 export default {
   name: 'App',
 
   components: {
-    Calendar,
-    CreateReminderModal
+    Calendar
   },
 
   mounted () {

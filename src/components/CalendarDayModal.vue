@@ -28,12 +28,14 @@
         </v-card-text>
       </template>
       <div class="tasks__container">
-        <v-card-text
+        <div
           v-for="(task, taskIndex) in selectedDay.monthData.tasks"
           :key="taskIndex"
+          class="task"
         >
+          {{ task.city ? task.city : '' }}
           <div class="task__label" :style="{ backgroundColor: task.color.hex }">
-          {{ task.time }} - {{   task.label  }}
+          {{ `${task.time} - ${task.label}`  }}
             <v-btn
               x-small
               text
@@ -46,7 +48,7 @@
               </v-icon>
             </v-btn>
           </div>
-        </v-card-text>
+        </div>
       </div>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -125,9 +127,13 @@ export default {
     overflow-y: auto;
   }
 
+  .task {
+    padding: 10px 20px;
+  }
+
   .task__label {
     color: white;
-    padding: .75rem;
+    padding: .5rem 1rem;
     font-size: 1rem;
     letter-spacing: .1rem;
     border-radius: 1rem;
