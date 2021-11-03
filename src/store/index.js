@@ -11,6 +11,7 @@ import {
 } from 'date-fns'
 
 import { prepareCalendarDays, prepareNewMonthData } from '@/helpers/calendar'
+import { getWeatherByCity } from '../services'
 
 Vue.use(Vuex)
 
@@ -46,6 +47,7 @@ export default new Vuex.Store({
       currentMonth: null,
       days: []
     },
+    cityWeather: null,
     selectedDay: null,
     showDayModal: false,
     showCreateReminderModal: false
@@ -82,6 +84,10 @@ export default new Vuex.Store({
 
     SET_DAY_MODAL_STATE (state, visibility) {
       state.showDayModal = visibility
+    },
+
+    SET_TODAY_CITY_WEATHER (state, weather) {
+      state.cityWeather = weather.status ? weather : null
     },
 
     ADD_DAY_REMINDER (state, reminder) {
@@ -140,6 +146,20 @@ export default new Vuex.Store({
       dispatch('setCalendarCurrentMonth', { date: reminder.date })
 
       commit('ADD_DAY_REMINDER', reminder)
+    },
+
+    async getDayWheater ({ commit }, city) {
+      try {
+        const response = await getWeatherByCity(city)
+
+        console.log(response.data)
+
+        const weather = response.data.weather[0].main
+
+        commit('SET_TODAY_CITY_WEATHER', { status: true, city, weather })
+      } catch (error) {
+        commit('SET_TODAY_CITY_WEATHER', { status: false, city })
+      }
     }
   }
 })
