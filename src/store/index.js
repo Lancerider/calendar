@@ -152,8 +152,6 @@ export default new Vuex.Store({
       try {
         const response = await getWeatherByCity(city)
 
-        console.log(response.data)
-
         const weather = response.data.weather[0].main
 
         commit('SET_TODAY_CITY_WEATHER', { status: true, city, weather })
